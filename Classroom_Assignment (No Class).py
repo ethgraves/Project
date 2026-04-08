@@ -1,4 +1,3 @@
-import random
 '''
 Idea:
 =====
@@ -31,8 +30,72 @@ CONFLICT TYPES:
     3 = Same Time Slot
     4 = Same Students
 '''
-def add_course(course_num):
-    return input(f"Enter the courses that conflict with C{course_num}: ").strip().split()
+def add_course(course_num, all_conflict_types):
+    course_conflicts = []
+    conflict_types = []
+
+    counter = 0
+
+    while True:
+        counter += 1
+        
+        print('=========================================')
+        print('If done with your selection, enter "Done"')
+        print('=========================================')
+
+        # =========================
+        # GETTING COURSE CONFLICTS
+        # =========================
+        if counter == 1:
+            course_conflict_input = input(f'\nWhat course does C{course_num} conflict with? (If none, enter "None"): ').strip().lower()
+            if course_conflict_input == "none" or course_conflict_input == "done": break
+            while not course_conflict_input.isdigit():
+                print(f"\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                print(f"Please enter a digit for the Course in Conflict")
+                print(f"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                course_conflict_input = input(f'\nWhat course does C{course_num} conflict with? (If none, enter "None"): ').strip().lower()
+            
+            if course_conflict_input == "none": break
+
+            course_conflicts.append(course_conflict_input)
+
+        else:
+            course_conflict_input = input(f'\nWhat course does C{course_num} conflict with?: ').strip().lower()
+            if course_conflict_input == "done": break
+            while not course_conflict_input.isdigit():
+                print(f"!!!!!!!!!!!!!!!!!!!!!!!!")
+                print(f"!!! Course C{course_conflict_input} does not exist !!!")
+                print(f"!!!!!!!!!!!!!!!!!!!!!!!!")
+                course_conflict_input = input(f'What course does C{course_num} conflict with?: ').strip().lower()
+            
+            if course_conflict_input == "none": break
+
+            course_conflicts.append(course_conflict_input)
+
+        # ======================
+        # GETTING CONFLICT TYPES
+        # ======================
+        print("TYPES OF CONFLICT:\n",
+            "\t1. Courses have the Same Professor\n"
+            "\t2. Courses have the Same Room Number\n"
+            "\t3. Courses have the Same Time Slot\n"
+            "\t4. Courses have the Same Students"
+        )
+        conflict_type_input = input(f"\nWhich type of conflict do these courses have (1-4)?: ").strip().lower()
+        while conflict_type_input not in all_conflict_types:
+            if conflict_type_input == "done":
+                print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                print("You must enter a conflict type before finishing")
+                print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            else:
+                print("!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                print("That is not a Conflict Type")
+                print("!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            conflict_type_input = input(f"Which type of conflict do these courses have (1-4)?: ").strip().lower()
+
+        conflict_types.append(conflict_type_input)
+
+    return course_conflicts, conflict_types
 
 
 def schedule_courses(working_schedule, course_to_add):
@@ -69,51 +132,49 @@ def Print_Current_Schedule(schedule):
 
 
 if __name__ == "__main__":
-    debug_example_classes = True
-    if debug_example_classes:
-        '''
-        Same Professor:
-            C1 <-> C2 (P=0)     (T!=)
-            C5 <-> C6 (P=1)     (T!=)
+    '''
+    Same Professor:
+        C1 <-> C2 (P=0)     (T!=)
+        C5 <-> C6 (P=1)     (T!=)
 
-        Same Room Number:
-            C1 <-> C3 (R=100)   (T!=)
+    Same Room Number:
+        C1 <-> C3 (R=100)   (T!=)
 
-        Same Time Slot:
-            C2 <-> C4 (T=0)     (P,R,S!=)
-            C4 <-> C6 (T=1)     (P,R,S!=)
+    Same Time Slot:
+        C2 <-> C4 (T=0)     (P,R,S!=)
+        C4 <-> C6 (T=1)     (P,R,S!=)
 
-        Same Students:
-            C3 <-> C5 (S=0)     (T!=)
-        '''
+    Same Students:
+        C3 <-> C5 (S=0)     (T!=)
+    '''
 
-        '''
-        CONFLICT TYPES:
-            1 = Same Professor
-            2 = Same Room Number
-            3 = Same Time Slot
-            4 = Same Students
-        '''
-        working_schedule = {}
+    '''
+    CONFLICT TYPES:
+        1 = Same Professor
+        2 = Same Room Number
+        3 = Same Time Slot
+        4 = Same Students
+    '''
+    all_conflict_types = [
+        '1',    # Same Professor
+        '2',    # Same Room
+        '3',    # Same Time Slot
+        '4'     # Same Students
+    ]
+
+    # The dictionary we will use to construct our schedule
+    working_schedule = {}
+
+    # Getting the course number
+    course_num = input("\nEnter a Course Number: ")
+    while course_num != "-1":
+        while not(course_num.isdigit()):
+            course_num = input("Please enter a digit for the Course Number: ")
+
+        
+        conflicts, conflict_types = add_course(course_num, all_conflict_types)
+        course_to_add = {"Course Number": course_num, "Room Number": 100, "Time Slot": 0, "Conflicts": conflicts, "Conflict Types": conflict_types}
+        working_schedule = schedule_courses(working_schedule, course_to_add)
+        Print_Current_Schedule(working_schedule)
 
         course_num = input("\nEnter a Course Number: ")
-        while course_num != "-1":
-            while not(course_num.isdigit()):
-                course_num = input("Please enter a digit for the Course Number: ")
-
-            conflicts = add_course(course_num)
-            course_to_add = {"Course Number": course_num, "Room Number": 100, "Time Slot": 0, "Conflicts": conflicts}
-            working_schedule = schedule_courses(working_schedule, course_to_add)
-            Print_Current_Schedule(working_schedule)
-
-            course_num = input("\nEnter a Course Number: ")
-
-
-        # C1 = Course(course_number=1, course_in_conflict=[2, 3], conflict_type=[1, 2])
-        # C2 = Course(course_number=2, course_in_conflict=[1, 4], conflict_type=[1, 3])
-        # C3 = Course(course_number=3, course_in_conflict=[1, 5], conflict_type=[2, 4])
-        # C4 = Course(course_number=4, course_in_conflict=[2, 6], conflict_type=[3, 3])
-        # C5 = Course(course_number=5, course_in_conflict=[3, 6], conflict_type=[4, 1])
-        # C6 = Course(course_number=6, course_in_conflict=[4, 5], conflict_type=[3, 1])
-
-        # for course in [C1, C2, C3, C4, C5, C6]

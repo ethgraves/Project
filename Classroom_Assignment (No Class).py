@@ -39,7 +39,7 @@ def add_course(course_num, all_conflict_types):
     while True:
         counter += 1
 
-        print('=========================================')
+        ('=========================================')
         print('If done with your selection, enter "Done"')
         print('=========================================')
 
@@ -108,28 +108,59 @@ def add_course(course_num, all_conflict_types):
     return course_conflicts, conflict_types
 
 
-def schedule_courses(working_schedule, course_to_add):
-    course_number = course_to_add["Course Number"]
-    if len(working_schedule) != 0:
-        room_number = course_to_add["Room Number"]
-        time_slot = course_to_add["Time Slot"]
-        conflicts = course_to_add["Conflicts"]
+def schedule_courses(working_schedule, num_time_slots, num_rooms):
+    print(working_schedule)
 
-        for course in working_schedule:
-            if (working_schedule[course]["Course Number"] in conflicts) or (course_number in working_schedule[course]["Conflicts"]):
-                for conflict_type in conflict_types:
-                    if conflict_type == "1":
-                        course_to_add["Time Slot"] += 1
-                    elif conflict_type == "2":
-                        course_to_add["Time Slot"] += 1
-                    elif conflict_type == "3":
-                        course_to_add["Room Number"] += 1
-                    elif conflict_type == "4":
-                        course_to_add["Time Slot"] += 1
+    working_list = [i for i in working_schedule]
 
-        working_schedule[course_number] = course_to_add
+    for x in working_list:
+        for y in working_list:
+            if y in working_schedule[x]["Conflicts"]:
+                for conflict_type in working_schedule[x]["Conflict Types"]:
+                    if working_schedule[x]["Time Slot"] < num_time_slots:
+                        working_schedule[x]["Time Slot"] += 1
+                    else:
+                        working_schedule[x]["Room Number"] += 1
+                    # if conflict_type == "1":
+                #     working_schedule[x]["Time Slot"] += 1
+                # elif conflict_type == "2":
+                #     working_schedule[x]["Time Slot"] += 1
+                # elif conflict_type == "3":
+                #     working_schedule[x]["Room Number"] += 1
+                # elif conflict_type == "4":
+                #     working_schedule[x]["Time Slot"] += 1
+                
+        
 
-    else: working_schedule[course_number] = course_to_add
+    # course_number = course_to_add["Course Number"]
+    # if len(working_schedule) != 0:
+    #     room_number = course_to_add["Room Number"]
+    #     time_slot = course_to_add["Time Slot"]
+    #     conflicts = course_to_add["Conflicts"]
+
+    #     print(working_schedule)
+    #     working_list = [working_schedule[i] for i in working_schedule]
+    #     print(f"#1: {working_list}")
+
+    #     for x in range(len(working_schedule)):
+    #         print(f"#2: {working_schedule["Course Number"]}")
+    #         not_same_course = working_list[x] == working_schedule[x]
+
+    #     for course in working_schedule:
+    #         if (working_schedule[course]["Course Number"] in conflicts) or (course_number in working_schedule[course]["Conflicts"]):
+    #             for conflict_type in conflict_types:
+    #                 if conflict_type == "1":
+    #                     course_to_add["Time Slot"] += 1
+    #                 elif conflict_type == "2":
+    #                     course_to_add["Time Slot"] += 1
+    #                 elif conflict_type == "3":
+    #                     course_to_add["Room Number"] += 1
+    #                 elif conflict_type == "4":
+    #                     course_to_add["Time Slot"] += 1
+
+    #     working_schedule[course_number] = course_to_add
+
+    # else: working_schedule[course_number] = course_to_add
 
     # print(working_schedule)
 
@@ -140,7 +171,7 @@ def Print_Current_Schedule(schedule):
     """
     '#': {'Course Number': '#', 'Room Number': ###, 'Time Slot': #, 'Conflicts': ['#', '#', ...]}
     """
-    print(schedule)
+    # print(schedule)
     for course in schedule:
         print(f"Course: C{course} | Time Slot: {schedule[course]['Time Slot']} | Room: {schedule[course]['Room Number']}")
 
@@ -180,6 +211,9 @@ if __name__ == "__main__":
     # The dictionary we will use to construct our schedule
     working_schedule = {}
 
+    num_time_slots = int(input("How many time slots are available? "))
+    num_rooms = int(input("How many rooms are available? "))
+
     # Getting the course number
     course_num = input("\nEnter a Course Number: ")
     while course_num != "-1":
@@ -188,8 +222,9 @@ if __name__ == "__main__":
 
         
         conflicts, conflict_types = add_course(course_num, all_conflict_types)
-        course_to_add = {"Course Number": course_num, "Room Number": 100, "Time Slot": 0, "Conflicts": conflicts, "Conflict Types": conflict_types}
-        working_schedule = schedule_courses(working_schedule, course_to_add)
+        if course_num not in working_schedule: working_schedule[course_num] = {"Course Number": course_num, "Room Number": 100, "Time Slot": 0, "Conflicts": conflicts, "Conflict Types": conflict_types}
+        # course_to_add = {"Course Number": course_num, "Room Number": 100, "Time Slot": 0, "Conflicts": conflicts, "Conflict Types": conflict_types}
+        working_schedule = schedule_courses(working_schedule, num_time_slots, num_rooms)
         Print_Current_Schedule(working_schedule)
 
         course_num = input("\nEnter a Course Number: ")

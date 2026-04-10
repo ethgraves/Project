@@ -138,7 +138,7 @@ def schedule_courses(working_schedule, course_to_add):
 
 def Print_Current_Schedule(schedule):
     """
-    '#': {'Course Number': '#', 'Room Number': ###, 'Time Slot': #, 'Conflicts':['#', '#', ...]}
+    '#': {'Course Number': '#', 'Room Number': ###, 'Time Slot': #, 'Conflicts': ['#', '#', ...]}
     """
     print(schedule)
     for course in schedule:

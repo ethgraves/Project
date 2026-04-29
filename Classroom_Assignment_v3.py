@@ -52,11 +52,9 @@ def Update_Working_Schedule(course_num, working_schedule, course_conflicts, conf
 
 
 
-def Add_Course(course_num, all_conflict_types, working_schedule):
+def Add_Course(course_num, all_conflict_types, working_schedule, counter=0):
     course_conflicts = []
     conflict_types = []
-
-    counter = 0
 
     while True:
         counter += 1
@@ -111,11 +109,11 @@ def Add_Course(course_num, all_conflict_types, working_schedule):
         # ======================
         # GETTING CONFLICT TYPES
         # ======================
-        print("TYPES OF CONFLICT:\n",
-            "\t1. Courses have the Same Professor\n"
-            "\t2. Courses have the Same Room Number\n"
-            "\t3. Courses have the Same Time Slot\n"
-            "\t4. Courses have the Same Students"
+        print("\nTYPES OF CONFLICT:",
+            "\n 1. Courses have the Same Professor"
+            "\n 2. Courses have the Same Room Number"
+            "\n 3. Courses have the Same Time Slot"
+            "\n 4. Courses have the Same Students"
         )
         conflict_type_input = input(f"\nWhich type of conflict do these courses have (1-4)?: ").strip().lower()
         while conflict_type_input not in all_conflict_types:
@@ -136,9 +134,24 @@ def Add_Course(course_num, all_conflict_types, working_schedule):
     return working_schedule
 
 
-#     working_schedule = {"Courses": [], "Time and Room": {}, "Conflicts and Conflict Types": {}}
 def Schedule_Courses(working_schedule, num_time_slots, num_rooms):
+    print_schedule = True
     conflicts_present = True
+    total_number_of_slots = num_time_slots * num_rooms
+
+    if len(working_schedule["Courses"]) == 0:
+        print("\n!!!!!!!!!!!!!!!!!!!!!!!!")
+        print("Please add courses first")
+        print("!!!!!!!!!!!!!!!!!!!!!!!!\n")
+        print_schedule = False
+        return working_schedule, print_schedule
+
+    if len(working_schedule["Courses"]) > total_number_of_slots:
+        print("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        print("Not enough Time Slots and Rooms available for all courses")
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+        print_schedule = False
+        return working_schedule, print_schedule
     
 
     while conflicts_present:
@@ -188,19 +201,45 @@ def Schedule_Courses(working_schedule, num_time_slots, num_rooms):
                 
                 else:
                     print("!!! ERROR OCCURRED !!!")
-                                
-
-    Print_Current_Schedule(working_schedule)
-    return working_schedule
+    
+    return working_schedule, print_schedule
 
 
 def Print_Current_Schedule(schedule):
-    """
-    working_schedule = {"Courses": [], "Time and Room": {}, "Conflicts and Conflict Types": {}}
-    """
-    # print(schedule)
+    print("\n=================================================")
+    print("FULL SCHEDULE:\n")
     for course in schedule["Courses"]:
         print(f"Course: C{course} | Time Slot: {schedule['Time and Room'][course][0]} | Room: {schedule['Time and Room'][course][1]}")
+    print("=================================================")
+
+
+def View_Course_Conflicts(working_schedule):
+    while True:
+        print("Here are the courses:")
+        for course in range(len(working_schedule["Courses"])):
+            print(f"   * Course {working_schedule['Courses'][course]}")
+        course_to_edit = input("\nWhich course would you like to view the conflicts of: ").strip().lower()
+        while course_to_edit not in working_schedule["Courses"]:
+            course_to_edit = input("That is not a course. Which course would you like to edit: ").strip().lower()
+
+        print(f"\nCourse {course_to_edit} Conflicts:")
+        for conflict in working_schedule["Conflicts and Conflict Types"][course_to_edit]:
+            course_conflicts = []
+            conflict_types = []
+            course_conflicts.append(conflict)
+            conflict_types.append(working_schedule["Conflicts and Conflict Types"][course_to_edit][conflict])
+            print(f"    * Course {conflict} (with conflict type #{working_schedule['Conflicts and Conflict Types'][course_to_edit][conflict]})\n")
+    
+        view_more_courses = input("Would you like to view another course (Yes or No)? ").strip().lower()
+        while view_more_courses not in ["yes", "y", "no", "n"]:
+            view_more_courses = input("That is not an option. Would you like to view another course? (Yes or No)").strip().lower()
+
+        if view_more_courses in ["yes", "y"]:
+            continue
+        elif view_more_courses in ["no", "n"]:
+            break
+        else:
+            print("!!! ERROR OCCURRED !!!")
 
 
 def main():
@@ -237,27 +276,66 @@ def main():
     # The dictionary we will use to construct our schedule
     working_schedule = {"Courses": [], "Time and Room": {}, "Conflicts and Conflict Types": {}}
 
-    num_time_slots = int(input("How many time slots are available? "))
-    num_rooms = int(input("How many rooms are available? "))
+    num_time_slots = input("How many Time Slots are available? ").strip().lower()
+    while not(num_time_slots.isdigit()):
+        num_time_slots = input("Please enter a digit for the Number of Available Time Slots: ").strip().lower()
+
+    num_rooms = input("How many Rooms are available? ").strip().lower()
+    while not(num_rooms.isdigit()):
+        num_rooms = input("Please enter a digit for the Number of Available Rooms: ").strip().lower()
+
+    num_time_slots = int(num_time_slots)
+    num_rooms = int(num_rooms)
 
     # Getting the course number
-    course_num = input("\nEnter a Course Number: ")
-    while course_num != "-1":
-        while not(course_num.isdigit()):
-            course_num = input("Please enter a digit for the Course Number: ")
+    while True:
+        print("\n=================================================")
+        print(f"OPTIONS\n"
+               "-------"
+               "\n  1. Add/Edit a Course"
+               "\n  2. View Course's Conflicts"
+               "\n  3. Change the Number of Available Time Slots"
+               "\n  4. Change the Number of Available Rooms"
+               "\n  5. Print Current Schedule"
+               "\n  6. Quit")
+        option = input("\nChoose one of the above options: ").strip().lower()
+        while option not in ["1", "2", "3", "4", "5", "6"]:
+            option = input("That is not an option. Please choose one of the above options: ").strip().lower()
 
+        if option == "1":
+            course_num = input("\nEnter a course number: ").strip().lower()
+            while not(course_num.isdigit()):
+                course_num = input("Please enter a digit for a Course Number: ").strip().lower()
+            working_schedule = Add_Course(course_num, all_conflict_types, working_schedule)
+
+        elif option == "2":
+            View_Course_Conflicts(working_schedule)
+
+        elif option == "3":
+            print(f"Current Number of Available Time Slots: {num_time_slots}")
+            num_time_slots = input("How many Time Slots are available? ").strip().lower()
+            while not(num_time_slots.isdigit()):
+                num_time_slots = input("Please enter a digit for the Number of Available Time Slots: ").strip().lower()
+            num_time_slots = int(num_time_slots)
+
+        elif option == "4":
+            print(f"Current Number of Available Rooms: {num_rooms}")
+            num_rooms = input("How many Rooms are available? ").strip().lower()
+            while not(num_rooms.isdigit()):
+                num_rooms = input("Please enter a digit for the Number of Available Rooms: ").strip().lower()
+            num_rooms = int(num_rooms)
+
+        elif option == "5":
+            working_schedule, print_schedule = Schedule_Courses(working_schedule, num_time_slots, num_rooms)
+            if print_schedule: Print_Current_Schedule(working_schedule)
         
-        working_schedule = Add_Course(course_num, all_conflict_types, working_schedule)
-        working_schedule = Schedule_Courses(working_schedule, num_time_slots, num_rooms)
-
-        course_num = input("\nEnter a Course Number: ")
+        elif option == "6":
+            break
 
 
 if __name__ == "__main__":
     DEBUG_MODE = False
 
-    # working_schedule = {'Courses': ['1', '2', '3'], 'Time and Room': {'1': [1, 100], '2': [1, 100], '3': [1, 100]}, 'Conflicts and Conflict Types': {'1': {'2': '4', '3': '23'}, '2': {'1': '4'}, '3': {'1': '3'}}}
-    # working_schedule = {'Courses': ['1', '2', '3'], 'Time and Room': {'1': [1, 100], '2': [1, 100], '3': [1, 100]}, 'Conflicts and Conflict Types': {'1': {'2': '4', '3': '1'}, '2': {'1': '4'}, '3': {'1': '1'}}}
     working_schedule = {
     'Courses': ['1', '2', '3', '4'], 
     'Time and Room': {'1': [1, 100], '2': [1, 100], '3': [1, 100], '4': [1, 100]}, 

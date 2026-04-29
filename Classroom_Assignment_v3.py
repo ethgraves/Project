@@ -32,30 +32,23 @@ CONFLICT TYPES:
 '''
 #     working_schedule = {"Courses": [], "Time and Room": {}, "Conflicts and Conflict Types": {}}
 def Update_Working_Schedule(course_num, working_schedule, course_conflicts, conflict_types):
-    if course_num in working_schedule["Courses"]:
-        for i in range(len(course_conflicts)):
-            working_schedule["Conflicts and Conflict Types"][course_num][course_conflicts[i]].update(conflict_types[i])
-
-    else:
+    if course_num not in working_schedule["Courses"]:
         working_schedule["Courses"].append(course_num)
         working_schedule["Time and Room"][course_num] = [1, 100]
         working_schedule["Conflicts and Conflict Types"][course_num] = {}
-        for i in range(len(course_conflicts)):
-            working_schedule["Conflicts and Conflict Types"][course_num][course_conflicts[i]] = {}
-        for i in range(len(course_conflicts)):
-            working_schedule["Conflicts and Conflict Types"][course_num][course_conflicts[i]] = conflict_types[i]
 
+    for i in range(len(course_conflicts)):
+        conflicted_course = course_conflicts[i]
+        conflicted_course_type = conflict_types[i]
 
-    for course in course_conflicts:
-        if course in working_schedule:
-            working_schedule["Conflicts and Conflict Types"][course][course_conflicts[0]].update(conflict_types[0])
-        
-        else:
-            working_schedule["Courses"].append(course)
-            working_schedule["Time and Room"][course] = [1, 100]
-            working_schedule["Conflicts and Conflict Types"][course] = {course_num: conflict_types[course_conflicts.index(course)]}
+        working_schedule["Conflicts and Conflict Types"][course_num][conflicted_course] = conflicted_course_type
 
-    print(working_schedule)
+        if conflicted_course not in working_schedule["Courses"]:
+            working_schedule["Courses"].append(conflicted_course)
+            working_schedule["Time and Room"][conflicted_course] = [1, 100]
+            working_schedule["Conflicts and Conflict Types"][conflicted_course] = {}
+
+        working_schedule["Conflicts and Conflict Types"][conflicted_course][course_num] = conflicted_course_type
 
 
 
@@ -68,14 +61,14 @@ def Add_Course(course_num, all_conflict_types, working_schedule):
     while True:
         counter += 1
 
-        print('\n=========================================')
-        print('If there are no conflicts, enter "None"')
-        print('=========================================', end='')
-
         # =========================
         # GETTING COURSE CONFLICTS
         # =========================
         if counter == 1:
+            print('\n=========================================')
+            print('If there are no conflicts, enter "None"')
+            print('=========================================', end='')
+            
             course_conflict_input = input(f'\nWhat course does C{course_num} conflict with? (If none, enter "None"): ').strip().lower()
             if course_conflict_input == "none" or course_conflict_input == "done": break
             while True:
@@ -93,7 +86,6 @@ def Add_Course(course_num, all_conflict_types, working_schedule):
                     continue
                 break
 
-            
             if course_conflict_input == "none": break
 
             course_conflicts.append(course_conflict_input)
@@ -115,11 +107,6 @@ def Add_Course(course_num, all_conflict_types, working_schedule):
 
             course_conflicts.append(course_conflict_input)
 
-        # if course_conflict_input in working_schedule:
-        #     working_schedule[course_conflict_input]["Conflicts"].append(course_num)
-        
-        # else:
-        #     working_schedule[course_conflict_input] = {"Course Number": course_conflict_input, "Room Number": 100, "Time Slot": 0, "Conflicts": [course_num], "Conflict Types": []}
 
         # ======================
         # GETTING CONFLICT TYPES
